@@ -1,4 +1,5 @@
-# portable-scala-java-test
+# Portable Scala Java Test
+
 When porting Java platform code to Scala.js and Scala Native you create
 unit tests. These tests should succeed if run against the JVM and also
 against the code you are creating for Scala.js, Scala Native or both
@@ -41,3 +42,10 @@ sbt:portable-scala-java-test> testSuiteJVM/test
 sbt:portable-scala-java-test> testSuiteNative/test
 sbt:portable-scala-java-test> testSuiteJS/test
 ```
+
+Currently the project uses [MUnit](https://scalameta.org/munit/) to test
+so you can't just copy paste to Scala.js that uses JUnit or Scala Native
+that has its own test suite and doesn't support JUnit yet.
+This is an inconvenience but the changes are pretty minor unless
+you have a big test suite. This should be a more nimble environment
+especially for Scala Native depending on your needs.
