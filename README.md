@@ -2,7 +2,9 @@
 When porting Java platform code to Scala.js and Scala Native you create
 unit tests. These tests should succeed if run against the JVM and also
 against the code you are creating for Scala.js, Scala Native or both
-platforms. **Warning: Please do not look at any Java source as it is GPL
+platforms. 
+
+**Warning: Please do not look at any Java source as it is GPL
 licensed and is not compatible with the Scala.js and Scala Native code
 bases.** You may use Apache Harmony or implement by scratch using the
 Javadoc.
@@ -20,10 +22,7 @@ and run on all three platforms. If this is not the case, you can put your
 code in the appropriate cross platform area.
 
 You can run the following commands in `sbt` to run for each platform and
-version:
-    `clean`
-    `compile`
-    `test`
+version: `clean` `compile` `test`
 
 If you would like to run one test suite against the JVM, Scala Native, and 
 Scala.js respectively, these are examples:
