@@ -1,0 +1,20 @@
+*.class
+*.log
+# Scala Native 0.4.0-M2 bug resolved for next version
+lowered.hnir
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+project/metals.sbt
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
