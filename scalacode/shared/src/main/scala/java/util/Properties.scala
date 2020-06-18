@@ -5,6 +5,7 @@ package java.util
 
 import java.io._
 import java.{util => ju}
+import java.{lang => jl}
 
 import scala.annotation.{switch, tailrec}
 import scala.collection.immutable.{Map => SMap}
@@ -19,11 +20,11 @@ class Properties(protected val defaults: Properties)
     put(key, value)
 
   def load(inStream: InputStream): Unit = {
-    loadImpl(new InputStreamReader(inStream, "ISO8859-1"))
+    loadImpl2(new InputStreamReader(inStream, "ISO8859-1"))
   }
 
   def load(reader: Reader): Unit =
-    loadImpl(reader)
+    loadImpl2(reader)
 
   def getProperty(key: String): String =
     getProperty(key, defaultValue = null)
@@ -114,23 +115,26 @@ class Properties(protected val defaults: Properties)
     store(out, comments)
 
   private def loadImpl2(reader: Reader): Unit = {
-    val br           = new BufferedReader(reader)
-    var line: String = null
-    while ({ line = br.readLine().trim(); line != null }) {
+    val br              = new BufferedReader(reader)
+    var rawline: String = null
+    while ({ rawline = br.readLine(); rawline != null }) {
       var i: Int = 0
+      val line   = rawline.trim()
       println(s"${line.length()}: '$line'")
 
       def parseUnicodeEscape(): Char = ???
+      def isWhitespace(char: Char): Boolean =
+        char == ' ' || char == '\t' || char == '\f'
+      def isKeySeparator(char: Char): Boolean =
+        char == '=' || char == ':' || isWhitespace(char)
 
       def parseKey(): String = {
-        val buf = new StringBuilder()
-        while (!(line.charAt(i) == '=' || line.charAt(i) == ':')) {
+        val buf = new jl.StringBuilder()
+        while (!isKeySeparator(line.charAt(i))) {
           if (line.charAt(i) == '\\') {
             i += 1
             buf.append(line.charAt(i))
             println(s"key: ${line.charAt(i)}")
-            i += 1
-          } else if (Character.isWhitespace(line.charAt(i))) { // key only not allowed
             i += 1
           } else {
             buf.append(line.charAt(i))
@@ -142,9 +146,9 @@ class Properties(protected val defaults: Properties)
       }
 
       def parseValue(): String = {
-        val buf = new StringBuilder()
-        // leading whitespace
-        while (i < line.length && Character.isWhitespace(line.charAt(i))) {
+        val buf = new jl.StringBuilder()
+        // remove leading whitespace and key separators
+        while (i < line.length && isKeySeparator(line.charAt(i))) {
           i += 1
         }
         while (i < line.length) {
@@ -155,7 +159,7 @@ class Properties(protected val defaults: Properties)
         buf.toString()
       }
 
-      def keepEscapedChar(ch: Char, buf: StringBuilder): Unit = {
+      def keepEscapedChar(ch: Char, buf: jl.StringBuilder): Unit = {
         if (ch == '\\') i += 1
         buf.append(line.charAt(i))
       }
@@ -175,8 +179,7 @@ class Properties(protected val defaults: Properties)
 
       if (!(isComment() || isEmpty())) {
         println(s"value continues: $valueContinues")
-        val key = parseKey()
-        i += 1 // the '='
+        val key   = parseKey()
         val value = parseValue()
         println(s"key:val '$key':'$value'")
         setProperty(key, value)

@@ -22,8 +22,7 @@ class PropertiesSuite extends FunSuite { // tests.Suite
     properties.put("age", Int.box(18))
     assert(null == properties.getProperty("age"))
     expectThrows(classOf[ClassCastException],
-      properties.list(new PrintWriter(new ByteArrayOutputStream))
-    )
+                 properties.list(new PrintWriter(new ByteArrayOutputStream)))
   }
 
   test("list") {
@@ -70,8 +69,7 @@ class PropertiesSuite extends FunSuite { // tests.Suite
   test("load(InputStream) with null input") {
     val prop = new Properties()
     assertThrows(classOf[NullPointerException],
-      prop.load(null: java.io.InputStream)
-    )
+                 prop.load(null: java.io.InputStream))
   }
 
   test("load(InputStream)") {
@@ -122,9 +120,11 @@ class PropertiesSuite extends FunSuite { // tests.Suite
 
   test("load(InputStream) with file input") {
     val file =
-      new File("testSuite/shared/src/test/resources/properties-load-test.properties")
+      new File(
+        "testSuite/shared/src/test/resources/properties-load-test.properties")
     val is: InputStream = new FileInputStream(file)
-    val prop            = new Properties()
+    //val is = new ByteArrayInputStream(filestr.getBytes())
+    val prop = new Properties()
     prop.load(is)
     is.close()
 
@@ -145,9 +145,7 @@ class PropertiesSuite extends FunSuite { // tests.Suite
 
   test("load(Reader) with null input") {
     val prop = new java.util.Properties()
-    assertThrows(classOf[NullPointerException],
-      prop.load(null: Reader)
-    )
+    assertThrows(classOf[NullPointerException], prop.load(null: Reader))
   }
 
   test("load(Reader)") {
@@ -178,9 +176,11 @@ class PropertiesSuite extends FunSuite { // tests.Suite
 
   test("load(Reader) with file input") {
     val file =
-      new File("testSuite/shared/src/test/resources/properties-load-test.properties")
+      new File(
+        "testSuite/shared/src/test/resources/properties-load-test.properties")
     val is: InputStream = new FileInputStream(file)
-    val prop            = new Properties()
+    //val is   = new ByteArrayInputStream(filestr.getBytes())
+    val prop = new Properties()
     prop.load(new InputStreamReader(is))
     is.close()
 
@@ -202,8 +202,7 @@ class PropertiesSuite extends FunSuite { // tests.Suite
   test("store(OutputStream, comments) with null input") {
     val prop = new Properties()
     assertThrows(classOf[NullPointerException],
-      prop.store(null: OutputStream, "")
-    )
+                 prop.store(null: OutputStream, ""))
   }
 
   // used for next two tests, \b prints as \u0008
@@ -267,9 +266,7 @@ class PropertiesSuite extends FunSuite { // tests.Suite
 
   test("store(Writer, comments) with null input") {
     val prop = new java.util.Properties()
-    assertThrows(classOf[NullPointerException],
-      prop.store(null: Writer, "")
-    )
+    assertThrows(classOf[NullPointerException], prop.store(null: Writer, ""))
   }
 
   test("store(Writer, comments)") {
@@ -294,4 +291,38 @@ class PropertiesSuite extends FunSuite { // tests.Suite
       assertEquals(prop2.getProperty(nextKey), prop1.getProperty(nextKey))
     }
   }
+
+  lazy val filestr =
+    """|
+       |
+       |
+       |
+       |   \ \r \n \t \f
+       |
+       |
+       |! dshfjklahfjkldashgjl;as
+       |     #jdfagdfjagkdjfghksdajfd
+       |
+       |!!properties
+       |
+       |a=a
+       |b bb as,dn   
+       |c\r\ \t\nu =:: cu
+       |bu= b\
+       |		u
+       |d=d\r\ne=e
+       |f   :f\
+       |f\
+       |			f
+       |g		g
+       |h\ h
+       |\   i=i
+       |j=\   j
+       |space=\   c
+       |
+       |dblbackslash=\\
+       |
+       |
+       |
+    """.stripMargin
 }
