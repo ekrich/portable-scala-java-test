@@ -123,10 +123,21 @@ class Properties(protected val defaults: Properties)
       println(s"${line.length()}: '$line'")
 
       def parseUnicodeEscape(): Char = ???
+
       def isWhitespace(char: Char): Boolean =
         char == ' ' || char == '\t' || char == '\f'
+
       def isKeySeparator(char: Char): Boolean =
         char == '=' || char == ':' || isWhitespace(char)
+
+      def isEmpty(): Boolean =
+        line.isEmpty() // trim removes all whitespace
+
+      def isComment(): Boolean =
+        line.startsWith("#") || line.startsWith("!")
+
+      def valueContinues(): Boolean =
+        line.endsWith("\\")
 
       def parseKey(): String = {
         val buf = new jl.StringBuilder()
@@ -159,24 +170,7 @@ class Properties(protected val defaults: Properties)
         buf.toString()
       }
 
-      def keepEscapedChar(ch: Char, buf: jl.StringBuilder): Unit = {
-        if (ch == '\\') i += 1
-        buf.append(line.charAt(i))
-      }
-
-      def filterWhitespace(ch: Char): Unit = {
-        if (Character.isWhitespace(ch)) i += 1
-      }
-
-      def isEmpty(): Boolean =
-        line.isEmpty() // trim removes all whitespace
-
-      def isComment(): Boolean =
-        line.startsWith("#") || line.startsWith("!")
-
-      def valueContinues(): Boolean =
-        line.endsWith("\\")
-
+      // run the parsing
       if (!(isComment() || isEmpty())) {
         println(s"value continues: $valueContinues")
         val key   = parseKey()
