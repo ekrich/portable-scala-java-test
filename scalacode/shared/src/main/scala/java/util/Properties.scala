@@ -120,10 +120,17 @@ class Properties(protected val defaults: Properties)
     var isKeyParsed     = false
     var key: String     = null
     var rawline: String = null
+
     while ({ rawline = br.readLine(); rawline != null }) {
-      var i: Int = 0
+      var i: Int = -1
       val line   = rawline.trim()
       println(s"${line.length()}: '$line'")
+      var ch: Char = Char.MinValue
+
+      def getNextChar: Char = {
+        i += 1
+        line.charAt(i)
+      }
 
       def parseUnicodeEscape(line: String): Char = {
         val sb = new jl.StringBuilder()
@@ -155,24 +162,26 @@ class Properties(protected val defaults: Properties)
 
       def parseKey(): String = {
         val buf = new jl.StringBuilder()
-        while (!isKeySeparator(line.charAt(i)) && !isKeyParsed) {
-          if (line.charAt(i) == '\\') {
-            i += 1
-            if (line.charAt(i) == 'u') {
-              i += 1
-              val ch = parseUnicodeEscape(line)
-              if (isKeySeparator(ch)) {
-                isKeyParsed = true
+        while (!isKeySeparator(ch)) {
+          if (ch == '\\') {
+            ch = getNextChar
+            if (ch == 'u') {
+              getNextChar
+              ch = parseUnicodeEscape(line)
+              if (!isKeySeparator(ch)) {
+                buf.append(ch)
+                println(s"key: ${ch}")
+                ch = getNextChar
               }
             } else {
-              buf.append(line.charAt(i))
-              println(s"key: ${line.charAt(i)}")
+              buf.append(ch)
+              println(s"key: ${ch}")
+              ch = getNextChar
             }
-            i += 1
           } else {
-            buf.append(line.charAt(i))
-            println(s"key: ${line.charAt(i)}")
-            i += 1
+            buf.append(ch)
+            println(s"key: ${ch}")
+            ch = getNextChar
           }
         }
         isKeyParsed = true
@@ -199,6 +208,7 @@ class Properties(protected val defaults: Properties)
 
       // run the parsing
       if (!(isComment() || isEmpty())) {
+        ch = getNextChar
         println(s"value continues: $valueContinues")
         if (!isKeyParsed) {
           valuebuf = new jl.StringBuilder()
