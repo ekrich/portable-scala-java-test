@@ -116,13 +116,27 @@ class Properties(protected val defaults: Properties)
 
   private def loadImpl2(reader: Reader): Unit = {
     val br              = new BufferedReader(reader)
+    var valuebuf        = new jl.StringBuilder()
+    var isKeyParsed     = false
+    var key: String     = null
     var rawline: String = null
     while ({ rawline = br.readLine(); rawline != null }) {
       var i: Int = 0
       val line   = rawline.trim()
       println(s"${line.length()}: '$line'")
 
-      def parseUnicodeEscape(): Char = ???
+      def parseUnicodeEscape(line: String): Char = {
+        val sb = new jl.StringBuilder()
+        var j  = 0
+        while (j < 4) {
+          sb.append(line.charAt(i))
+          i += 1
+          j += 1
+        }
+        val ch = Integer.parseInt(sb.toString(), 16).toChar
+        println(s"Escape: '$ch'")
+        ch
+      }
 
       def isWhitespace(char: Char): Boolean =
         char == ' ' || char == '\t' || char == '\f'
@@ -141,11 +155,19 @@ class Properties(protected val defaults: Properties)
 
       def parseKey(): String = {
         val buf = new jl.StringBuilder()
-        while (!isKeySeparator(line.charAt(i))) {
+        while (!isKeySeparator(line.charAt(i)) && !isKeyParsed) {
           if (line.charAt(i) == '\\') {
             i += 1
-            buf.append(line.charAt(i))
-            println(s"key: ${line.charAt(i)}")
+            if (line.charAt(i) == 'u') {
+              i += 1
+              val ch = parseUnicodeEscape(line)
+              if (isKeySeparator(ch)) {
+                isKeyParsed = true
+              }
+            } else {
+              buf.append(line.charAt(i))
+              println(s"key: ${line.charAt(i)}")
+            }
             i += 1
           } else {
             buf.append(line.charAt(i))
@@ -153,19 +175,24 @@ class Properties(protected val defaults: Properties)
             i += 1
           }
         }
+        isKeyParsed = true
         buf.toString()
       }
 
-      def parseValue(): String = {
-        val buf = new jl.StringBuilder()
+      def parseValue(buf: jl.StringBuilder): String = {
         // remove leading whitespace and key separators
         while (i < line.length && isKeySeparator(line.charAt(i))) {
           i += 1
         }
         while (i < line.length) {
-          buf.append(line.charAt(i))
-          println(s"value: ${line.charAt(i)}")
-          i += 1
+          if (valueContinues() && i == line.length() - 1) {
+            // ignore the backslash
+            i += 1
+          } else {
+            buf.append(line.charAt(i))
+            println(s"value: ${line.charAt(i)}")
+            i += 1
+          }
         }
         buf.toString()
       }
@@ -173,10 +200,24 @@ class Properties(protected val defaults: Properties)
       // run the parsing
       if (!(isComment() || isEmpty())) {
         println(s"value continues: $valueContinues")
-        val key   = parseKey()
-        val value = parseValue()
-        println(s"key:val '$key':'$value'")
-        setProperty(key, value)
+        if (!isKeyParsed) {
+          valuebuf = new jl.StringBuilder()
+          key = parseKey()
+          val value = parseValue(valuebuf)
+          if (!valueContinues()) {
+            setProperty(key, value)
+            isKeyParsed = false
+          }
+        } else if (valueContinues()) {
+          valuebuf.append(',')
+          val value = parseValue(valuebuf)
+        } else {
+          valuebuf.append(',')
+          val value = parseValue(valuebuf)
+          setProperty(key, value)
+          isKeyParsed = false
+        }
+        println(s"key:val '$key':'${getProperty(key)}'")
       }
     }
   }
