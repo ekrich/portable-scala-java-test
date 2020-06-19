@@ -195,7 +195,7 @@ class Properties(protected val defaults: Properties)
         }
         while (i < line.length) {
           if (valueContinues() && i == line.length() - 1) {
-            // ignore the backslash
+            // ignore the final backslash
             i += 1
           } else {
             buf.append(line.charAt(i))
@@ -219,10 +219,8 @@ class Properties(protected val defaults: Properties)
             isKeyParsed = false
           }
         } else if (valueContinues()) {
-          valuebuf.append(',')
           val value = parseValue(valuebuf)
         } else {
-          valuebuf.append(',')
           val value = parseValue(valuebuf)
           setProperty(key, value)
           isKeyParsed = false
