@@ -174,6 +174,7 @@ class Properties(protected val defaults: Properties)
         line.startsWith("#") || line.startsWith("!")
 
       def valueContinues(): Boolean = {
+        // odd number of backslashes at end of line
         val pm = pattern.matcher(line)
         if (pm.find()) {
           val num = pm.end - pm.start
@@ -188,41 +189,23 @@ class Properties(protected val defaults: Properties)
       def parseKey(): String = {
         val buf = new jl.StringBuilder()
         // key sep or empty value
-
         while (!isKeySeparator(ch) && i < line.length()) {
           if (ch == '\\') {
             ch = getNextChar
-            //println(s"esc: '${ch}'")
             if (ch == 'u') {
-              getNextChar
-              ch = parseUnicodeEscape(line)
-              println(s"unicode ch: '$ch'")
-              buf.append(ch)
-              ch = getNextChar // cur char
-              println(s"unicode next: '$ch'")
-              // this if is wrong as h\u0020h isn't "h h"=""
-              // if (!isKeySeparator(ch)) {
-              //   buf.append(ch)
-              //   println(s"key unicode: '${ch}''")
-              //   ch = getNextChar
-              //   if (isKeySeparator(ch)) ch = getNextChar
-              // }
+              getNextChar // advance
+              val uch = parseUnicodeEscape(line)
+              buf.append(uch)
             } else if (ch == 't' || ch == 'f' || ch == 'r' || ch == 'n' || ch == 'b') {
               val mch = chMap(ch)
               buf.append(mch)
-              println(s"key: '${mch}'")
-              ch = getNextChar
             } else {
               buf.append(ch)
-              println(s"key: ${ch}")
-              ch = getNextChar
             }
           } else {
             buf.append(ch)
-            println(s"key: ${ch}")
-            ch = getNextChar
           }
-          // ch = getNextChar // do it here?
+          ch = getNextChar
         }
         // remove trailing whitespace
         while (i < line.length && isWhitespace(ch)) {
