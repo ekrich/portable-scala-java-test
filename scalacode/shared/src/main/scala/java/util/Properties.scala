@@ -490,7 +490,7 @@ class Properties(protected val defaults: Properties)
   private def encodeString(string: String,
                            isKey: Boolean,
                            toHex: Boolean): String = {
-    val buffer = new StringBuilder(200)
+    val buffer = new jl.StringBuilder(200)
     var index  = 0
     val length = string.length
     // leading element (value) spaces are escaped
@@ -517,7 +517,7 @@ class Properties(protected val defaults: Properties)
           buffer.append("\\ ")
         case _ =>
           if (toHex && (ch < ' ' || ch > '~')) {
-            buffer.appendAll(unicodeToHexaDecimal(ch))
+            buffer.append(unicodeToHexaDecimal(ch))
           } else {
             buffer.append(ch)
           }
