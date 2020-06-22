@@ -315,7 +315,7 @@ class PropertiesSuite extends FunSuite { // tests.Suite
        |f\
        |			f
        |g		g
-       |h\\u0020h
+       |h\ h
        |\   i=i
        |j=\   j
        |space=\   c
