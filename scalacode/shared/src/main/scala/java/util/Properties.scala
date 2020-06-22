@@ -119,7 +119,7 @@ class Properties(protected val defaults: Properties)
       SMap('b' -> '\b', 'f' -> '\f', 'n' -> '\n', 'r' -> '\r', 't' -> '\t')
     val br                = new BufferedReader(reader)
     var valBuf          = new jl.StringBuilder()
-    var doesValueContinue = false
+    var prevValueContinue = false
     var isKeyParsed       = false
     var key: String       = null
     var rawline: String   = null
@@ -148,15 +148,17 @@ class Properties(protected val defaults: Properties)
           j += 1
         }
         val ch = Integer.parseInt(sb.toString(), 16).toChar
-        println(s"UNICODE: '$ch'")
         ch
       }
 
       def isWhitespace(char: Char): Boolean =
         char == ' ' || char == '\t' || char == '\f'
 
+      def isTokenKeySeparator(char: Char): Boolean =
+        char == '=' || char == ':'
+
       def isKeySeparator(char: Char): Boolean =
-        char == '=' || char == ':' || isWhitespace(char)
+        isTokenKeySeparator(char) || isWhitespace(char)
 
       def isEmpty(): Boolean =
         line.isEmpty() // trim removes all whitespace
@@ -165,6 +167,7 @@ class Properties(protected val defaults: Properties)
         line.startsWith("#") || line.startsWith("!")
 
       def valueContinues(): Boolean =
+        // use regex - must end with odd number
         line.endsWith("\\")
 
       def parseKey(): String = {
@@ -176,10 +179,12 @@ class Properties(protected val defaults: Properties)
             if (ch == 'u') {
               getNextChar
               ch = parseUnicodeEscape(line)
+              // this if is wrong as h\u0020h isn't "h h"=""
               if (!isKeySeparator(ch)) {
                 buf.append(ch)
-                println(s"key: ${ch}")
+                println(s"key unicode: '${ch}''")
                 ch = getNextChar
+                if (isKeySeparator(ch)) ch = getNextChar
               }
             } else if (ch == 't' || ch == 'f' || ch == 'r' || ch == 'n' || ch == 'b') {
               val mch = chMap(ch)
@@ -196,18 +201,33 @@ class Properties(protected val defaults: Properties)
             println(s"key: ${ch}")
             ch = getNextChar
           }
+          // ch = getNextChar // do it here?
+        }
+        // remove trailing whitespace
+        while (i < line.length && isWhitespace(ch)) {
+          println(s"trim key trailing: '${ch}'")
+          ch = getNextChar
+        }
+        // remove key separator `: or =`
+        if (i < line.length && isTokenKeySeparator(ch)) {
+          println(s"trim key sep: '${ch}'")
+          ch = getNextChar
         }
         isKeyParsed = true
         buf.toString()
       }
 
       def parseValue(): String = {
-        // remove leading whitespace and key separators
-        ch = getNextChar
-        println(s"val: '${ch}'")
-        if (i < line.length && isKeySeparator(ch)) {
-          //println(s"trim val: '${ch}'")
+        // remove leading whitespace
+        while (i < line.length && isWhitespace(ch)) {
+          println(s"trim val lead ws: '${ch}'")
           ch = getNextChar
+        }
+
+        // nothing but line continuation
+        if (valueContinues() && i == line.length() - 1) {
+            // ignore the final backslash
+            ch = getNextChar
         }
 
         while (i < line.length) {
@@ -222,7 +242,7 @@ class Properties(protected val defaults: Properties)
               ch = getNextChar
               //println(s"esc: '${ch}'")
               if (ch == 'u') {
-                getNextChar
+                getNextChar // advance
                 ch = parseUnicodeEscape(line)
                 if (!isWhitespace(ch)) {
                   valBuf.append(ch)
@@ -245,6 +265,7 @@ class Properties(protected val defaults: Properties)
               ch = getNextChar
             }
           }
+          //ch = getNextChar // we can probably do it here
         }
         valBuf.toString()
       }
@@ -256,21 +277,24 @@ class Properties(protected val defaults: Properties)
           valBuf = new jl.StringBuilder()
           key = parseKey()
           val value = parseValue()
-          doesValueContinue = valueContinues()
-          if (!doesValueContinue) {
+          if(key == "bu") println(s"curval '$value'")
+          prevValueContinue = valueContinues()
+          if (!prevValueContinue) {
             setProperty(key, value)
             println(s"key:val '$key':'${value}'")
             isKeyParsed = false
           }
-        } else if (doesValueContinue) {
+        } else if (prevValueContinue && valueContinues()) {
           val value = parseValue()
-          doesValueContinue = valueContinues()
+          if(key == "bu") println(s"nexval '$value'")
+          prevValueContinue = valueContinues()
         } else {
           val value = parseValue()
+          if(key == "bu") println(s"finval '${valBuf.toString}'")
           setProperty(key, value)
           println(s"key:val '$key':'${value}'")
           isKeyParsed = false
-          doesValueContinue = false
+          prevValueContinue = false
         }
       }
     }
