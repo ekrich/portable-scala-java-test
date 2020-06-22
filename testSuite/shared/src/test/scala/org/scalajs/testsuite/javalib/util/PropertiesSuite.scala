@@ -127,7 +127,6 @@ class PropertiesSuite extends FunSuite { // tests.Suite
     val prop = new Properties()
     prop.load(is)
     is.close()
-    prop.list(System.out)
 
     assertEquals("\n \t \f", prop.getProperty(" \r"))
     assertEquals("a", prop.getProperty("a"))
@@ -316,7 +315,7 @@ class PropertiesSuite extends FunSuite { // tests.Suite
        |f\
        |			f
        |g		g
-       |h\ h
+       |h\\u0020h
        |\   i=i
        |j=\   j
        |space=\   c
