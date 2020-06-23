@@ -241,8 +241,8 @@ class Properties(protected val defaults: Properties)
             ch = getNextChar
           } else {
             processChar(valBuf)
+            ch = getNextChar
           }
-          ch = getNextChar
         }
         valBuf.toString()
       }
