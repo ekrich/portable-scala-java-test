@@ -82,7 +82,7 @@ lazy val testSuite = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     testFrameworks += new TestFramework("munit.Framework"),
     libraryDependencies +=
-      "org.scalameta" %%% "munit" % "0.7.2" % Test,
+      "org.scalameta" %%% "munit" % "0.7.9" % Test,
     scalacOptions += "-target:jvm-1.8"
   )
   .jsSettings(
