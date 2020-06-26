@@ -132,7 +132,8 @@ class PropertiesSuite extends FunSuite { // tests.Suite
     assertEquals("   j", prop.getProperty("j"))
     assertEquals("   c", prop.getProperty("space"))
     assertEquals("\\", prop.getProperty("dblbackslash"))
-    assertEquals("foo, bar", prop.getProperty("trailing"))
+    assertEquals("foo,   ", prop.getProperty("trailing"))
+    assertEquals("", prop.getProperty("bar"))
     assertEquals("""baz \  """, prop.getProperty("notrailing"))
   }
 

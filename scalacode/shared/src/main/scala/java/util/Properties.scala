@@ -116,7 +116,7 @@ class Properties(protected val defaults: Properties)
 
   private def loadImpl(reader: Reader): Unit = {
     import java.util.regex._
-    val trailingBackspace = Pattern.compile("""(\\)+(\s)*$""")
+    val trailingBackspace = Pattern.compile("""(\\)+$""")
     lazy val chMap =
       SMap('b' -> '\b', 'f' -> '\f', 'n' -> '\n', 'r' -> '\r', 't' -> '\t')
     val br                = new BufferedReader(reader)
@@ -177,12 +177,6 @@ class Properties(protected val defaults: Properties)
           isOdd
         } else {
           false
-        }
-      }
-
-      def rightTrimLine(): Unit = {
-        if (oddBackslash()) {
-          line = line.substring(0, line.lastIndexOf("\\") + 1)
         }
       }
 
@@ -254,7 +248,6 @@ class Properties(protected val defaults: Properties)
 
       // run the parsing
       if (!(isComment() || isEmpty())) {
-        rightTrimLine()
         ch = getNextChar
         if (!isKeyParsed) {
           valBuf = new jl.StringBuilder()
