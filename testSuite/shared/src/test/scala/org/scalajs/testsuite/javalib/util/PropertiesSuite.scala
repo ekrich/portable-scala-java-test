@@ -19,7 +19,7 @@ class PropertiesSuite extends FunSuite { // tests.Suite
   test("non-string values") {
     val properties = new Properties
 
-    properties.put("age", Int.box(18))
+    properties.put("age", Integer.valueOf(18))
     assert(null == properties.getProperty("age"))
     expectThrows(classOf[ClassCastException],
                  properties.list(new PrintWriter(new ByteArrayOutputStream)))
@@ -138,11 +138,11 @@ class PropertiesSuite extends FunSuite { // tests.Suite
   }
 
   test("load(InputStream) with file input") {
-    val file =
-      new File(
-        "testSuite/shared/src/test/resources/properties-load-test.properties")
-    val is: InputStream = new FileInputStream(file)
-    //val is = new ByteArrayInputStream(filestr.getBytes())
+    // val file =
+    //   new File(
+    //     "testSuite/shared/src/test/resources/properties-load-test.properties")
+    // val is: InputStream = new FileInputStream(file)
+    val is = new ByteArrayInputStream(filestr.getBytes())
     val prop = new Properties()
     prop.load(is)
     is.close()
@@ -181,11 +181,11 @@ class PropertiesSuite extends FunSuite { // tests.Suite
   }
 
   test("load(Reader) with file input") {
-    val file =
-      new File(
-        "testSuite/shared/src/test/resources/properties-load-test.properties")
-    val is: InputStream = new FileInputStream(file)
-    //val is   = new ByteArrayInputStream(filestr.getBytes())
+    // val file =
+    //   new File(
+    //     "testSuite/shared/src/test/resources/properties-load-test.properties")
+    // val is: InputStream = new FileInputStream(file)
+    val is   = new ByteArrayInputStream(filestr.getBytes())
     val prop = new Properties()
     prop.load(new InputStreamReader(is))
     is.close()
@@ -315,7 +315,10 @@ class PropertiesSuite extends FunSuite { // tests.Suite
        |
        |dblbackslash=\\
        |
-       |
+       |# jvm does not trim trailing space so no line continuation
+       |trailing = foo, \  
+       |bar
+       |notrailing = baz \\  
        |
     """.stripMargin
 }
